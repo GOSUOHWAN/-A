@@ -1,9 +1,5 @@
 package main
 
-/* Imports
- * 4 utility libraries for formatting, handling bytes, reading and writing JSON, and string manipulation
- * 2 specific Hyperledger Fabric specific libraries for Smart Contracts
- */
 import (
 	"bytes"
 	"encoding/json"
@@ -17,27 +13,20 @@ import (
 type SmartContract struct {
 }
 
-// Define the car structure, with 4 properties.  Structure tags are used by encoding/json library
 type Drone struct {
 	Make   string `json:"make"` // 제작사
 	Model  string `json:"model"` // 제품명
 	Owner  string `json:"owner"` // 소유주 개인,법인 
 }
-/*
- * The Init method is called when the Smart Contract "fabcar" is instantiated by the blockchain network
- * Best practice is to have any Ledger initialization in separate function -- see initLedger()
- */
+
  func (s *SmartContract) Init(APIstub shim.ChaincodeStubInterface) sc.Response {
 	return shim.Success(nil)
 }
-/*
- * The Invoke method is called as a result of an application request to run the Smart Contract "fabcar"
- * The calling application program has also specified the particular smart contract function to be called, with arguments
- */
+
  func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response {
-// Retrieve the requested Smart Contract function and arguments
+
 function, args := APIstub.GetFunctionAndParameters()
-// Route to the appropriate handler function to interact with the ledger appropriately
+
 if function == "queryDrone" {
 	return s.queryDrone(APIstub, args)
 } else if function == "initLedger" {
@@ -102,7 +91,6 @@ func (s *SmartContract) queryAllDrones(APIstub shim.ChaincodeStubInterface) sc.R
 	}
 defer resultsIterator.Close()
 
-// buffer is a JSON array containing QueryResults
 var buffer bytes.Buffer
 buffer.WriteString("[")
 
@@ -112,7 +100,7 @@ for resultsIterator.HasNext() {
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	// Add a comma before array members, suppress it for the first array member
+	
 	if bArrayMemberAlreadyWritten == true {
 		buffer.WriteString(",")
 	}
