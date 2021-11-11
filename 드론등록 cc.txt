@@ -1,0 +1,157 @@
+package main
+
+/* Imports
+ * 4 utility libraries for formatting, handling bytes, reading and writing JSON, and string manipulation
+ * 2 specific Hyperledger Fabric specific libraries for Smart Contracts
+ */
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"strconv"
+
+	"github.com/hyperledger/fabric/core/chaincode/shim"
+	sc "github.com/hyperledger/fabric/protos/peer"
+)
+// 스마트 계약 구조
+type SmartContract struct {
+}
+
+// Define the car structure, with 4 properties.  Structure tags are used by encoding/json library
+type Drone struct {
+	Make   string `json:"make"` // 제작사
+	Model  string `json:"model"` // 제품명
+	Owner  string `json:"owner"` // 소유주 개인,법인 
+}
+/*
+ * The Init method is called when the Smart Contract "fabcar" is instantiated by the blockchain network
+ * Best practice is to have any Ledger initialization in separate function -- see initLedger()
+ */
+ func (s *SmartContract) Init(APIstub shim.ChaincodeStubInterface) sc.Response {
+	return shim.Success(nil)
+}
+/*
+ * The Invoke method is called as a result of an application request to run the Smart Contract "fabcar"
+ * The calling application program has also specified the particular smart contract function to be called, with arguments
+ */
+ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response {
+// Retrieve the requested Smart Contract function and arguments
+function, args := APIstub.GetFunctionAndParameters()
+// Route to the appropriate handler function to interact with the ledger appropriately
+if function == "queryDrone" {
+	return s.queryDrone(APIstub, args)
+} else if function == "initLedger" {
+	return s.initLedger(APIstub)
+} else if function == "createDrone" {
+	return s.createDrone(APIstub, args)
+} else if function == "queryAllDrones" {
+	return s.queryAllDrones(APIstub)
+} else if function == "changeDroneOwner" {
+	return s.changeDroneOwner(APIstub, args)
+}
+return shim.Error("Invalid Smart Contract function name.")
+}
+
+	func (s *SmartContract) queryDrone(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
+
+		if len(args) != 1 {
+			return shim.Error("Incorrect number of arguments. Expecting 1")
+		}
+		droneAsBytes, _ := APIstub.GetState(args[0])
+		return shim.Success(droneAsBytes)
+	}
+	func (s *SmartContract) initLedger(APIstub shim.ChaincodeStubInterface) sc.Response {
+		drones := []Drone{
+			Drone{Make: "Airbus", Model: "DJI Mavic2", Owner: "Ulsan Univ"},
+			Drone{Make: "Ford", Model: "M", Owner: "SSS"},
+			Drone{Make: "Hyundai", Model: "T", Owner: "DDDD"},
+		}
+		i := 0
+	for i < len(drones) {
+		fmt.Println("i is ", i)
+		droneAsBytes, _ := json.Marshal(drones[i])
+		APIstub.PutState("DRONE"+strconv.Itoa(i), droneAsBytes)
+		fmt.Println("Added", drones[i])
+		i = i + 1
+	}
+
+	return shim.Success(nil)
+	}
+	func (s *SmartContract) createDrone(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
+
+		if len(args) != 4 {
+			return shim.Error("Incorrect number of arguments. Expecting 4")
+		}
+		var drone = Drone{Make: args[1], Model: args[2], Owner: args[3]}
+
+		droneAsBytes, _ := json.Marshal(drone)
+		APIstub.PutState(args[0], droneAsBytes)
+
+		return shim.Success(nil)
+}
+func (s *SmartContract) queryAllDrones(APIstub shim.ChaincodeStubInterface) sc.Response {
+
+	startKey := ""
+	endKey := ""
+
+	resultsIterator, err := APIstub.GetStateByRange(startKey, endKey)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+defer resultsIterator.Close()
+
+// buffer is a JSON array containing QueryResults
+var buffer bytes.Buffer
+buffer.WriteString("[")
+
+bArrayMemberAlreadyWritten := false
+for resultsIterator.HasNext() {
+	queryResponse, err := resultsIterator.Next()
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	// Add a comma before array members, suppress it for the first array member
+	if bArrayMemberAlreadyWritten == true {
+		buffer.WriteString(",")
+	}
+	buffer.WriteString("{\"Key\":")
+	buffer.WriteString("\"")
+	buffer.WriteString(queryResponse.Key)
+	buffer.WriteString("\"")
+
+	buffer.WriteString(", \"Record\":")
+		// Record is a JSON object, so we write as-is
+		buffer.WriteString(string(queryResponse.Value))
+		buffer.WriteString("}")
+		bArrayMemberAlreadyWritten = true
+	}
+	buffer.WriteString("]")
+
+	fmt.Printf("- queryAllDrones:\n%s\n", buffer.String())
+
+	return shim.Success(buffer.Bytes())
+}
+	func (s *SmartContract) changeDroneOwner(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
+
+	if len(args) != 2 {
+		return shim.Error("Incorrect number of arguments. Expecting 2")
+	}
+
+	droneAsBytes, _ := APIstub.GetState(args[0])
+	drone := Drone{}
+
+	json.Unmarshal(droneAsBytes, &drone)
+	drone.Owner = args[1]
+
+	droneAsBytes, _ = json.Marshal(drone)
+	APIstub.PutState(args[0], droneAsBytes)
+
+	return shim.Success(nil)
+}
+func main() {
+	err := shim.Start(new(SmartContract))
+	if err != nil {
+		fmt.Println("Error creating new Smart Contract: %s", err)
+		
+	}
+}
