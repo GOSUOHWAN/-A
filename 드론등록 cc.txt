@@ -51,12 +51,21 @@ return shim.Error("Invalid Smart Contract function name.")
 	}
 	func (s *SmartContract) initLedger(APIstub shim.ChaincodeStubInterface) sc.Response {
 		drones := []Drone{
-			Drone{Make: "Airbus", Model: "Mavic", Owner: "Ajou Univ"},
-			Drone{Make: "Airbus", Model: "DJI Mavic2", Owner: "Ulsan Univ"},
-			Drone{Make: "Samsung", Model: "aeroG Aviation aG-4 Liberty", Owner: "Samsung Co"},
-			Drone{Make: "Hyundai", Model: "Cargo UAS", Owner: "Hyundai Co"},
+			
+			Drone{Make: "Airbus", Model: "NextGen", Owner: "Ajou Univ"},
+			Drone{Make: "aeroG", Model: "aeroG Aviation aG-4 Liberty", Owner: "Samsung Co"},
+			Drone{Make: "Hyundai", Model: "Cargo UAS2", Owner: "Hyundai Co"},
+			Drone{Make: "Uber", Model: "eCRM-002", Owner: "Uber TAXI Co"},
+			Drone{Make: "Bell", Model: "Nexus 4EX", Owner: "Ajou Univ"},
 			Drone{Make: "Hyundai", Model: "UAM SA1", Owner: "Hyundai Co"},
-			Drone{Make: "Hyundai", Model: "UAM SA4", Owner: "GOSUOHWAN"},
+			Drone{Make: "Bell", Model: "Nexus 6EX", Owner: "Ajou Univ"},
+			Drone{Make: "Hyundai", Model: "UAM SA2", Owner: "GOSUOHWAN"},
+			Drone{Make: "Airbus", Model: "CityAirbus", Owner: "Ajou Univ"},
+			Drone{Make: "aeroG", Model: "aeroG Aviation aG-4 Liberty", Owner: "Samsung Co"},
+			Drone{Make: "HyundaiMobis", Model: "Cargo UAS", Owner: "SooYeonida"},
+			Drone{Make: "Hyundai", Model: "UAM SA3", Owner: "Hyundai Co"},
+			Drone{Make: "Dusan Stan", Model: "Aliptera APV-1", Owner: "Sobin"},
+			
 		}
 		i := 0
 	for i < len(drones) {
