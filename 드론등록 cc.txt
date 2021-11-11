@@ -65,6 +65,7 @@ return shim.Error("Invalid Smart Contract function name.")
 			Drone{Make: "HyundaiMobis", Model: "Cargo UAS", Owner: "SooYeonida"},
 			Drone{Make: "Hyundai", Model: "UAM SA3", Owner: "Hyundai Co"},
 			Drone{Make: "Dusan Stan", Model: "Aliptera APV-1", Owner: "Subin"},
+			Drone{Make: "Porsche Boeing", Model: "Porsche", Owner: "Gunyeong"},
 			
 		}
 		i := 0
