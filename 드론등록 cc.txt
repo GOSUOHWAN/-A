@@ -334,9 +334,9 @@ func (s *SmartContract) changeDroneOwner(APIstub shim.ChaincodeStubInterface, ar
 
 func (s *SmartContract) addRating(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
 
-	if len(args) != 3 {
+	if len(args) != 7 {
 
-		return shim.Error("Incorrect number of arguments. Expecting 3")
+		return shim.Error("Incorrect number of arguments. Expecting 7")
 
 	}
 
@@ -348,7 +348,7 @@ func (s *SmartContract) addRating(APIstub shim.ChaincodeStubInterface, args []st
 
 		return shim.Error(jsonResp)
 
-	} else if droneAsBytes == nil{ // no State! error
+	} else if droneAsBytes == nil{ 
 
 		jsonResp := "\"Error\":\"User does not exist: "+ args[0]+"\"}"
 
@@ -369,16 +369,16 @@ func (s *SmartContract) addRating(APIstub shim.ChaincodeStubInterface, args []st
 
 	
 
-	var Data = Data{DroneID: args[1] , Altitude: args[2], Angle: args[3], Height: args[4], Speed: args[5], Latitude: args[6],
-	Longitude: args[7], }
+	var Data = Data{DroneID: args[0] , Altitude: args[1], Angle: args[2], Height: args[3], Speed: args[4], Latitude: args[5],
+	Longitude: args[6], }
 
 	drone.Datas=append(drone.Datas,Data)
-
+	
 	droneAsBytes, err = json.Marshal(drone);
 
 	APIstub.PutState(args[0], droneAsBytes)
 
-	return shim.Success([]byte("rating is updated"))
+	return shim.Success([]byte("data is updated"))
 }
 
 func main() {
